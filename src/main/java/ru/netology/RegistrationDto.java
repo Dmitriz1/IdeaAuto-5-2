@@ -1,17 +1,23 @@
 package ru.netology;
 
-public class User {
+import com.google.gson.annotations.SerializedName;
+
+public class RegistrationDto {
+    @SerializedName("login")
     private String login;
+
+    @SerializedName("password")
     private String password;
+
+    @SerializedName("status")
     private String status;
 
-    public User(String login, String password, String status) {
+    public RegistrationDto(String login, String password, String status) {
         this.login = login;
         this.password = password;
         this.status = status;
     }
 
-    // Getters и toString() для удобного отображения
     public String getLogin() {
         return login;
     }
@@ -22,13 +28,5 @@ public class User {
 
     public String getStatus() {
         return status;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" + "login='" + login + '\\' +
-        ", password='" + password + '\\' +
-        ", status='" + status + '\\' +
-        '}';
     }
 }

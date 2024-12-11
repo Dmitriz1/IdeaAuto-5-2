@@ -3,14 +3,14 @@ package ru.netology;
 import java.util.Random;
 
 public class UserGenerator {
-    private static final String[] STATUSES = {"active", "blocked"};
-    private static final Random RANDOM = new Random();
+    private static final String[] statuses = {"active", "blocked"};
+    private static final Random random = new Random();
 
-    public static User generateRandomUser() {
-        String login = "user" + RANDOM.nextInt(10000); // Генерация уникального логина
-        String password = "password" + RANDOM.nextInt(100); // Генерация пароля
-        String status = STATUSES[RANDOM.nextInt(STATUSES.length)]; // Случайный статус
+    public static RegistrationDto generateRandomUser() {
+        String login = "user" + random.nextInt(1000); // Генерация случайного логина
+        String password = "password" + random.nextInt(100); // Генерация случайного пароля
+        String status = statuses[random.nextInt(statuses.length)]; // Случайный статус
 
-        return new User(login, password, status);
+        return new RegistrationDto(login, password, status);
     }
 }
