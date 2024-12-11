@@ -1,1 +1,1 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/2cvmn2ag8ulpu8js?svg=true)](https://ci.appveyor.com/project/Dmitriz1/ideaauto-5-1)
+[![Build status](https://ci.appveyor.com/api/projects/status/xj8dunwtuh69lm2x?svg=true)](https://ci.appveyor.com/project/Dmitriz1/ideaauto-5-2)
