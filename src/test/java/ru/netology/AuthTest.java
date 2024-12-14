@@ -1,88 +1,100 @@
 package ru.netology;
 
-import io.restassured.filter.log.LogDetail;
-import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.Test;
-import io.restassured.http.ContentType;
-import io.restassured.builder.RequestSpecBuilder;
+import org.junit.jupiter.api.BeforeEach;
 
-import static io.restassured.RestAssured.given;
+import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Selenide.*;
 
 public class AuthTest {
-    private static RequestSpecification requestSpec = new RequestSpecBuilder()
-            .setBaseUri("http://localhost")
-            .setPort(9999)
-            .setAccept(ContentType.JSON)
-            .setContentType(ContentType.JSON)
-            .log(LogDetail.ALL)
-            .build();
-
+    @BeforeEach
+    void setUp(){
+        open("http://localhost:9999");
+    }
     @Test
-    void testCreateUser() {
-        RegistrationDto user = UserGenerator.generateRandomUser();
-        given()
-                .spec(requestSpec)
-                .body(user)
-                .when()
-                .post("/api/system/users")
-                .then()
-                .statusCode(200);
+    void shouldTestActive() {
+        var validUser = UserGenerator.Registration.getRegisteredUser("active");
+        $("[data-test-id=login] input").setValue(validUser.getLogin());
+        $("[data-test-id=password] input").setValue(validUser.getPassword());
+        $("[data-test-id=action-login]").click();
     }
 
     @Test
-    void testCreateExistingUser() {
-        RegistrationDto user = new RegistrationDto("vasya", "password", "active");
-        given()
-                .spec(requestSpec)
-                .body(user)
-                .when()
-                .post("/api/system/users")
-                .then()
-                .statusCode(200);
-
-        // Повторный запрос с тем же логином
-        given()
-                .spec(requestSpec)
-                .body(user)
-                .when()
-                .post("/api/system/users")
-                .then()
-                .statusCode(400);
+    void shouldTestBlocked() {
+        var validUser = UserGenerator.Registration.getRegisteredUser("blocked");
+        $("[data-test-id=login] input").setValue(validUser.getLogin());
+        $("[data-test-id=password] input").setValue(validUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(text("Пользователь заблокирован"));
     }
 
     @Test
-    void testCreateUserWithInvalidLogin() {
-        RegistrationDto user = new RegistrationDto("", "password", "active"); // Невалидный логин
-        given()
-                .spec(requestSpec)
-                .body(user)
-                .when()
-                .post("/api/system/users")
-                .then()
-                .statusCode(400);
+    void shouldTestRandomLoginUnregistered() {
+        var inValidUser = UserGenerator.Registration.getUser("blocked");
+        $("[data-test-id=login] input").setValue(UserGenerator.Registration.getRandomLogin());
+        $("[data-test-id=password] input").setValue(inValidUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(text("Неверно указан логин или пароль"));
     }
 
     @Test
-    void testCreateUserWithInvalidPassword() {
-        RegistrationDto user = new RegistrationDto("vasya", "", "active"); // Невалидный пароль
-        given()
-                .spec(requestSpec)
-                .body(user)
-                .when()
-                .post("/api/system/users")
-                .then()
-                .statusCode(400);
+    void shouldTestRandomPassUnregistered() {
+        var invalidUser = UserGenerator.Registration.getUser("blocked");
+        $("[data-test-id=login] input").setValue(invalidUser.getLogin());
+        $("[data-test-id=password] input").setValue(UserGenerator.Registration.getRandomPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(text("Неверно указан логин или пароль"));
     }
 
     @Test
-    void testCreateUserWithBlockedStatus() {
-        RegistrationDto user = new RegistrationDto("vasya2", "password", "blocked");
-        given()
-                .spec(requestSpec)
-                .body(user)
-                .when()
-                .post("/api/system/users")
-                .then()
-                .statusCode(400);
+    void shouldTestRandomPassAndLoginRegistered() {
+        $("[data-test-id=login] input").setValue(UserGenerator.Registration.getRandomLogin());
+        $("[data-test-id=password] input").setValue(UserGenerator.Registration.getRandomPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(text("Неверно указан логин или пароль"));
+    }
+
+    @Test
+    void shouldTestRandomLoginRegistered() {
+        var validUser = UserGenerator.Registration.getRegisteredUser("blocked");
+        $("[data-test-id=login] input").setValue(UserGenerator.Registration.getRandomLogin());
+        $("[data-test-id=password] input").setValue(validUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(text("Неверно указан логин или пароль"));
+    }
+
+    @Test
+    void shouldTestRandomPassRegistered() {
+        var validUser = UserGenerator.Registration.getRegisteredUser("blocked");
+        $("[data-test-id=login] input").setValue(validUser.getLogin());
+        $("[data-test-id=password] input").setValue(UserGenerator.Registration.getRandomPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(text("Неверно указан логин или пароль"));
+    }
+
+    @Test
+    void shouldTestLoginNotification() {
+        var validUser = UserGenerator.Registration.getRegisteredUser("active");
+        $("[data-test-id=login] input").setValue("");
+        $("[data-test-id=password] input").setValue(validUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=login].input_invalid .input__sub").shouldHave(text("Поле обязательно для заполнения"));
+    }
+
+    @Test
+    void shouldTestPassNotification() {
+        var validUser = UserGenerator.Registration.getRegisteredUser("active");
+        $("[data-test-id=login] input").setValue(validUser.getLogin());
+        $("[data-test-id=password] input").setValue("");
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=password].input_invalid .input__sub").shouldHave(text("Поле обязательно для заполнения"));
+    }
+    @Test
+    void shouldTestBothNotifications() {
+        $("[data-test-id=login] input").setValue("");
+        $("[data-test-id=password] input").setValue("");
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=login].input_invalid .input__sub").shouldHave(text("Поле обязательно для заполнения"));
+        $("[data-test-id=password].input_invalid .input__sub").shouldHave(text("Поле обязательно для заполнения"));
     }
 }
